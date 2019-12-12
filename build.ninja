@@ -1,0 +1,36 @@
+
+# config.ninja is generated with pkg-config information from ./configure.sh.
+# It provides: $cflags_user $linkflags_user $cflags_lib $cflags_lib_test $linkflags_lib $linkflags_lib_test
+include config.ninja
+
+cflags = -std=c99 -pedantic -fstack-protector-strong -fPIE -pipe -Wall -Wextra -Werror -O3 -D_DEFAULT_SOURCE -D_FORTIFY_SOURCE=2 $cflags_user $cflags_lib
+cflags_test = -Wno-gnu-zero-variadic-macro-arguments $cflags_lib_test -Isrc
+
+linkflags = $linkflags_user $linkflags_lib
+linkflags_test = $linkflags_lib_test
+
+rule cc
+  command = $compiler $cflags -c $in -o $out
+
+rule link
+  command = $compiler -o $out $in $linkflags
+
+rule cc_test
+  command = $compiler $cflags $cflags_test -c $in -o $out
+
+rule link_test
+  command = $compiler -o $out $in $linkflags $linkflags_test
+
+build obj/main.o: cc src/main.c
+build obj/time_util.o: cc src/time_util.c
+build obj/extract_csv.o: cc src/extract_csv.c
+build obj/extract_json.o: cc src/extract_json.c
+build obj/extract.o: cc src/extract.c
+
+build extractor: link obj/main.o obj/extract.o obj/extract_json.o obj/extract_csv.o obj/time_util.o
+
+build obj/check_main.o: cc_test test/check_main.c
+
+build test_suite: link_test obj/check_main.o obj/time_util.o obj/extract_json.o obj/extract_csv.o obj/extract.o
+
+default extractor

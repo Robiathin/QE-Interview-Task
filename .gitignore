@@ -1,0 +1,9 @@
+
+obj/*
+*.o
+a.out
+config.ninja
+.ninja_deps
+.ninja_log
+extractor
+test_suite
